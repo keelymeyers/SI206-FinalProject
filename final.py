@@ -1,6 +1,6 @@
 import requests 
 import json
-
+import plotly
 
 CACHE_FNAME = "cached_data.json"
 # Put the rest of your caching setup here:
@@ -31,3 +31,12 @@ def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
         pickle.dump(cache_diction, fobj)
         fobj.close()
         return response.text
+
+def get_playlist_info(x):
+	playlist_url = "https://api.spotify.com/v1/users/keelymeyers/playlists/6zJ9XA4stWwQZU0MPU3y79/tracks"
+	d = {"keelymeyers", "6zJ9XA4stWwQZU0MPU3y79"}
+	
+	playlist_info = get_with_caching(playlist_url, d, saved_cache, cache_fname)
+	print(playlist_info)
+	print (json.loads(playlist_info))
+	return json.loads(playlist_info)
