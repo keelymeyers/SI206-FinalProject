@@ -1,6 +1,7 @@
 import requests 
 import json
 import plotly
+import spotipy
 
 CACHE_FNAME = "cached_data.json"
 # Put the rest of your caching setup here:
@@ -32,11 +33,22 @@ def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
         fobj.close()
         return response.text
 
-def get_playlist_info(x):
-	playlist_url = "https://api.spotify.com/v1/users/keelymeyers/playlists/6zJ9XA4stWwQZU0MPU3y79/tracks"
-	d = {"keelymeyers", "6zJ9XA4stWwQZU0MPU3y79"}
-	
-	playlist_info = get_with_caching(playlist_url, d, saved_cache, cache_fname)
-	print(playlist_info)
-	print (json.loads(playlist_info))
-	return json.loads(playlist_info)
+
+## Spotify API ##
+
+
+util.prompt_for_user_token(username,scope,client_id='your-app-redirect-url',client_secret='your-app-redirect-url',redirect_uri='your-app-redirect-url')
+app.get('/login', function(req, res) {
+var scopes = 'user-read-recently-played';
+res.redirect('https://accounts.spotify.com/authorize' + 
+  '?response_type=code' +
+  '&client_id=' + my_client_id +
+  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
+  '&redirect_uri=' + encodeURIComponent(redirect_uri));
+});
+
+
+
+
+
+
