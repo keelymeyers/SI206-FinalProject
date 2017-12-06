@@ -2,6 +2,7 @@ import requests
 import json
 import plotly
 import spotipy
+import facebook
 
 CACHE_FNAME = "cached_data.json"
 # Put the rest of your caching setup here:
@@ -34,21 +35,17 @@ def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
         return response.text
 
 
-## Spotify API ##
+## Facebook API ##
+access_token = "EAACEdEose0cBAMFRMZCjaqX1nFwZC6zNmg5ZCn4ZBpz4qwbfKuD1ucD3a8Jg3bptvHxANH1GVzZCB22mlrrHcLgwK6LfqkBV54ZCwzcW6JBdNHW0GLcvZAzlthxBOztlTw672MiE5PuasNZAy4IxayIqcMRsf8BXoUZBWFQdNhki3rib57HuwYnvx0Cd9AcuwgZBoZD"
+r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":2, "access_token":access_token})
 
 
-util.prompt_for_user_token(username,scope,client_id='your-app-redirect-url',client_secret='your-app-redirect-url',redirect_uri='your-app-redirect-url')
-app.get('/login', function(req, res) {
-var scopes = 'user-read-recently-played';
-res.redirect('https://accounts.spotify.com/authorize' + 
-  '?response_type=code' +
-  '&client_id=' + my_client_id +
-  (scopes ? '&scope=' + encodeURIComponent(scopes) : '') +
-  '&redirect_uri=' + encodeURIComponent(redirect_uri));
-});
+#access_token = None
+#if access_token is None:
+    #access_token = input("\nCopy and paste token from https://developers.facebook.com/tools/explorer\n>  ")
 
-
-
-
-
+graph = facebook.GraphAPI(access_token)
+user = graph.get_object('me') 
+likes = graph.get_connections('me','likes')
+print(json.dumps(likes, indent = 4))
 
