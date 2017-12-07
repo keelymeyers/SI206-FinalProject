@@ -4,6 +4,7 @@ import plotly
 import spotipy
 import facebook
 import datetime
+import facebook_info
 
 CACHE_FNAME = "cached_data.json"
 # Put the rest of your caching setup here:
@@ -37,7 +38,7 @@ def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
 
 
 ## Facebook API ##
-access_token = "EAACEdEose0cBAL0sfUvu65RCKt5oT9QqEFaJF7Q8COeDJrODblw82qG36IDIF0aihUINuqGE8GbvhRyvNPgLKPzYF4qZC2sZAYXZBsQwJvpeEE8RGe3iyQcCaUbZADg3ZCS1AJkNIuLN5nTVlfCYdfHETwrFhQxDTfK6T1xafXAkHP9yzGsRgUbO9ow6IVIEZD"
+access_token = facebook_info.access_token
 r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":100, "access_token":access_token})
 
 
@@ -47,8 +48,72 @@ r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":100, 
 
 graph = facebook.GraphAPI(access_token)
 user = graph.get_object('me') 
-likes = graph.get_connections('me','feed', limit=100)
-print(json.dumps(likes, indent = 4))
+feed = graph.get_connections('me','feed', limit=100)
+#print(json.dumps(feed, indent = 4))
+
+
+datetime.datetime.today()
+datetime.datetime(2012, 3, 23, 23, 24, 55, 173504)
+datetime.datetime.today().weekday()
+
+today = datetime.datetime(2017, 12, 7)
+weekday = today.weekday()
+#print(weekday)
+
+
+def get_weekday(x):
+
+    year = x["created_time"][:4]
+    #print(year)
+    month = x["created_time"][5:7]
+    #print(month)
+    day = x["created_time"][8:10]
+    #print(day)
+    weekday_tuple = (year, month, day)
+    day_of_week = datetime.datetime(int(year), int(month), int(day))
+    weekday = day_of_week.weekday()
+    if weekday == 0:
+        weekday ="Monday"
+    elif weekday == 1:
+        weekday ="Tuesday"
+    elif weekday == 2:
+        weekday ="Wednesday"
+    elif weekday == 3:
+        weekday ="Thursday"
+    elif weekday == 4:
+        weekday ="Friday"
+    elif weekday == 5:
+        weekday ="Saturday"
+    elif weekday == 6:
+        weekday = "Sunday"
+    else:
+        print("NOT A VALID DATE")
+
+
+    return weekday
+
+
+
+
+for activity in feed["data"]:
+    print(get_weekday(activity))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #graph = facebook.GraphAPI(access_token)
