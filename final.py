@@ -3,6 +3,7 @@ import json
 import plotly
 import spotipy
 import facebook
+import datetime
 
 CACHE_FNAME = "cached_data.json"
 # Put the rest of your caching setup here:
@@ -36,8 +37,8 @@ def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
 
 
 ## Facebook API ##
-access_token = "EAACEdEose0cBAMFRMZCjaqX1nFwZC6zNmg5ZCn4ZBpz4qwbfKuD1ucD3a8Jg3bptvHxANH1GVzZCB22mlrrHcLgwK6LfqkBV54ZCwzcW6JBdNHW0GLcvZAzlthxBOztlTw672MiE5PuasNZAy4IxayIqcMRsf8BXoUZBWFQdNhki3rib57HuwYnvx0Cd9AcuwgZBoZD"
-r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":2, "access_token":access_token})
+access_token = "EAACEdEose0cBAL0sfUvu65RCKt5oT9QqEFaJF7Q8COeDJrODblw82qG36IDIF0aihUINuqGE8GbvhRyvNPgLKPzYF4qZC2sZAYXZBsQwJvpeEE8RGe3iyQcCaUbZADg3ZCS1AJkNIuLN5nTVlfCYdfHETwrFhQxDTfK6T1xafXAkHP9yzGsRgUbO9ow6IVIEZD"
+r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":100, "access_token":access_token})
 
 
 #access_token = None
@@ -46,6 +47,73 @@ r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":2, "a
 
 graph = facebook.GraphAPI(access_token)
 user = graph.get_object('me') 
-likes = graph.get_connections('me','likes')
+likes = graph.get_connections('me','feed', limit=100)
 print(json.dumps(likes, indent = 4))
+
+
+#graph = facebook.GraphAPI(access_token)
+#all_fields = ['name', 'created_at']
+#all_fields = ','.join(all_fields)
+#posts = graph.get_connections('me','likes', fields = all_fields, limit=100) 
+
+#print(len(posts["data"]))
+#print(json.dumps(posts, indent = 4))
+
+
+
+##### Spotify API ####
+
+## music3 playlist id: 6zJ9XA4stWwQZU0MPU3y79
+## user id: 1e64d1a09838405e9eaa201d162bddf8
+
+
+
+#username = "keelymeyers"
+#playlist = "6zJ9XA4stWwQZU0MPU3y79"
+#sp = spotipy.Spotify()
+##sp_playlist = sp.user_playlist_tracks(username, playlist_id=playlist)
+#tracks = sp_playlist['items']
+#print (tracks)
+
+#print(sp.current_user_recently_played(limit=100))
+
+
+#import requests_oauthlib
+#import webbrowser
+#import json
+
+#CLIENT_ID = "1e64d1a09838405e9eaa201d162bddf8"
+#CLIENT_SECRET = "ade3635c31c4463980eeb2d1ec998f1f"
+#AUTHORIZATION_URL = 'https://accounts.spotify.com/authorize'
+
+# NOTE: you need to specify this same REDIRECT_URI in the Spotify API console
+#REDIRECT_URI = 'https://www.programsinformationpeople.org/runestone/oauth'
+
+#oauth = requests_oauthlib.OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI)
+
+#authorization_url, state = oauth.authorization_url(AUTHORIZATION_URL)#, access_type="offline", approval_prompt="force")
+
+#webbrowser.open(authorization_url)
+#authorization_response = raw_input('Enter the full callback URL')
+
+# the OAuth2Session instance has a method that extracts what we need from the url, and does some other back and forth with spotify
+#TOKEN_URL = 'https://accounts.spotify.com/api/token'
+#token = oauth.fetch_token(TOKEN_URL, authorization_response=authorization_response, client_secret=CLIENT_SECRET)
+
+# Now we can just use the get method from here on out to make requests to spotify endpoints
+#r = oauth.get('https://api.spotify.com/v1/me')
+#print (r.url)
+#response_dict = json.loads(r.text)
+#print (json.dumps(response_dict, indent=2))
+
+#base_url = "https://api.spotify.com"
+
+
+
+
+
+
+
+
+
 
