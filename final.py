@@ -5,9 +5,14 @@ import spotipy
 import facebook
 import datetime
 import facebook_info
+import sqlite3
 
-CACHE_FNAME = "cached_data.json"
-# Put the rest of your caching setup here:
+## Facebook API ##
+
+access_token = facebook_info.access_token
+
+
+CACHE_FNAME = "cached_fbdata.json"
 
 try:
     cache_file = open(CACHE_FNAME,'r')
@@ -17,49 +22,23 @@ try:
 except:
     CACHE_DICTION = {}
 
-def requestURL(baseurl, params = {}):
-    req = requests.Request(method = 'GET', url = baseurl, params = params)
-    prepped = req.prepare()
-    return prepped.url
-
-def get_with_caching(base_url, params_diction, cache_diction, cache_fname):
-    full_url = requestURL(base_url, params_diction)
-    if full_url in cache_diction:
-        #logging.info("retrieving cached result for " + full_url)
-        return cache_diction[full_url]
+def get_facebook_data(me):
+    if me in CACHE_DICTION:
+        print ("Using cached data")
+        facebook_results = CACHE_DICTION[me]
     else:
-        response = requests.get(base_url, params=params_diction)
-        #logging.info("adding cached result for " + full_url)
-        cache_diction[full_url] = response.text
-        fobj = open(cache_fname, "w")
-        pickle.dump(cache_diction, fobj)
-        fobj.close()
-        return response.text
+        print ('getting data from internet')
+        graph = facebook.GraphAPI(access_token)
+        user = graph.get_object('me') 
+        facebook_results = graph.get_connections('me','feed', limit=100)
+        CACHE_DICTION[me] = facebook_results
+        fw = open(CACHE_FNAME,"w")
+        fw.write(json.dumps(CACHE_DICTION))
+        fw.close() # Close the open file
+    return facebook_results
 
-
-## Facebook API ##
-access_token = facebook_info.access_token
-r = requests.get("https://graph.facebook.com/v2.3/me/feed",params={"limit":100, "access_token":access_token})
-
-
-#access_token = None
-#if access_token is None:
-    #access_token = input("\nCopy and paste token from https://developers.facebook.com/tools/explorer\n>  ")
-
-graph = facebook.GraphAPI(access_token)
-user = graph.get_object('me') 
-feed = graph.get_connections('me','feed', limit=100)
-#print(json.dumps(feed, indent = 4))
-
-
-datetime.datetime.today()
-datetime.datetime(2012, 3, 23, 23, 24, 55, 173504)
-datetime.datetime.today().weekday()
-
-today = datetime.datetime(2017, 12, 7)
-weekday = today.weekday()
-#print(weekday)
-
+feed = get_facebook_data("Keely Meyers")
+#print(json.dumps(feed, indent=4))
 
 def get_weekday(x):
 
@@ -93,85 +72,145 @@ def get_weekday(x):
     return weekday
 
 
+def get_time_of_day(y):
+    hour = int(y["created_time"][11:13])
+    if hour >= 0:
+        if hour < 6:
+            time_of_day = "12:00am - 5:59am"
+        elif hour >= 6:
+            if hour < 12:
+                time_of_day = "6:00am - 11:59am"
+            elif hour >= 12:
+                if hour < 18:
+                    time_of_day = "12:00pm - 5:59pm"
+                elif hour >= 18:
+                    time_of_day = "6:00pm - 11:59pm"
+                else:
+                    return ("not a valid time")
+    return time_of_day
 
 
+# Breaking code down by weekday
+
+#weekday_counts = {}
+#for activity in feed["data"]:
+    #if get_weekday(activity) not in weekday_counts:
+        #weekday_counts[get_weekday(activity)] = 1
+    #else:
+       #weekday_counts[get_weekday(activity)] += 1
+
+
+# Breaking code down by time of day
+
+monday_counts={}
+tuesday_counts={}
+wednesday_counts={}
+thursday_counts={}
+friday_counts={}
+saturday_counts={}
+sunday_counts={}
 for activity in feed["data"]:
-    print(get_weekday(activity))
+    if get_weekday(activity) == 'Monday':
+        if get_time_of_day(activity) not in monday_counts:
+            monday_counts[get_time_of_day(activity)] = 1
+        else:
+            monday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Tuesday':
+        if get_time_of_day(activity) not in tuesday_counts:
+            tuesday_counts[get_time_of_day(activity)] = 1
+        else:
+            tuesday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Wednesday':
+        if get_time_of_day(activity) not in wednesday_counts:
+            wednesday_counts[get_time_of_day(activity)] = 1
+        else:
+            wednesday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Thursday':
+        if get_time_of_day(activity) not in thursday_counts:
+            thursday_counts[get_time_of_day(activity)] = 1
+        else:
+            thursday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Friday':
+        if get_time_of_day(activity) not in friday_counts:
+            friday_counts[get_time_of_day(activity)] = 1
+        else:
+            friday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Saturday':
+        if get_time_of_day(activity) not in saturday_counts:
+            saturday_counts[get_time_of_day(activity)] = 1
+        else:
+            saturday_counts[get_time_of_day(activity)] += 1
+    elif get_weekday(activity) == 'Sunday':
+        if get_time_of_day(activity) not in sunday_counts:
+            sunday_counts[get_time_of_day(activity)] = 1
+        else:
+            sunday_counts[get_time_of_day(activity)] += 1
+
+print(monday_counts, tuesday_counts, wednesday_counts, thursday_counts, friday_counts, saturday_counts, sunday_counts)
+
+# To avoid key errors when using plotly #
+
+times = ["12:00am - 5:59am", "6:00am - 11:59am", "12:00pm - 5:59pm", "6:00pm - 11:59pm"]
+for t in times:
+    if t not in monday_counts:
+        monday_counts[t] = 0
+    if t not in tuesday_counts:
+        tuesday_counts[t] = 0
+    if t not in wednesday_counts:
+        wednesday_counts[t] = 0
+    if t not in thursday_counts:
+        thursday_counts[t] = 0
+    if t not in friday_counts:
+        friday_counts[t] = 0
+    if t not in saturday_counts:
+        saturday_counts[t] = 0
+    if t not in sunday_counts:
+        sunday_counts[t] = 0
+
+
+
+## SQL Database ##
+
+conn = sqlite3.connect('206_FinalProject.sqlite')
+cur = conn.cursor()
+
+cur.execute('DROP TABLE IF EXISTS Facebook')
+cur.execute('CREATE TABLE Facebook (post_id TEXT, day_of_week TEXT, time_of_day TEXT)')
+for post in feed["data"]:
+    tup = (post["id"], get_weekday(post), get_time_of_day(post))
+    cur.execute('INSERT INTO Facebook (post_id, day_of_week, time_of_day) VALUES (?, ?, ?)', tup)
+
+conn.commit()
+
+
+## Data Visualization ## 
+
+import plotly 
+plotly.tools.set_credentials_file(username='keelym', api_key='pcDVvvfhyFvMo2CRErMZ')
+
+
+import plotly.plotly as py
+import plotly.graph_objs as go
+
+py.sign_in('keelym', 'pcDVvvfhyFvMo2CRErMZ')
+
+
+
+trace1 = go.Bar(x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], y=[monday_counts["12:00am - 5:59am"], tuesday_counts["12:00am - 5:59am"], wednesday_counts["12:00am - 5:59am"], thursday_counts["12:00am - 5:59am"], friday_counts["12:00am - 5:59am"], saturday_counts["12:00am - 5:59am"], sunday_counts["12:00am - 5:59am"]], name="12:00am - 5:59am")
+trace2 = go.Bar(x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], y=[monday_counts["6:00am - 11:59am"], tuesday_counts["6:00am - 11:59am"], wednesday_counts["6:00am - 11:59am"], thursday_counts["6:00am - 11:59am"], friday_counts["6:00am - 11:59am"], saturday_counts["6:00am - 11:59am"], sunday_counts["6:00am - 11:59am"]], name="6:00am - 11:59am")
+trace3 = go.Bar(x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], y=[monday_counts["12:00pm - 5:59pm"], tuesday_counts["12:00pm - 5:59pm"], wednesday_counts["12:00pm - 5:59pm"], thursday_counts["12:00pm - 5:59pm"], friday_counts["12:00pm - 5:59pm"], saturday_counts["12:00pm - 5:59pm"], sunday_counts["12:00pm - 5:59pm"]], name="12:00pm - 5:59pm")
+trace4 = go.Bar(x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], y=[monday_counts["6:00pm - 11:59pm"], tuesday_counts["6:00pm - 11:59pm"], wednesday_counts["6:00pm - 11:59pm"], thursday_counts["6:00pm - 11:59pm"], friday_counts["6:00pm - 11:59pm"], saturday_counts["6:00pm - 11:59pm"], sunday_counts["6:00pm - 11:59pm"]], name="6:00pm - 11:59pm")
+
+
+data = [trace1, trace2, trace3, trace4]
+layout = go.Layout(barmode='stack')
+
+fig = go.Figure(data=data, layout=layout)
+py.plot(fig, filename='facebook-stacked-bar')
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#graph = facebook.GraphAPI(access_token)
-#all_fields = ['name', 'created_at']
-#all_fields = ','.join(all_fields)
-#posts = graph.get_connections('me','likes', fields = all_fields, limit=100) 
-
-#print(len(posts["data"]))
-#print(json.dumps(posts, indent = 4))
-
-
-
-##### Spotify API ####
-
-## music3 playlist id: 6zJ9XA4stWwQZU0MPU3y79
-## user id: 1e64d1a09838405e9eaa201d162bddf8
-
-
-
-#username = "keelymeyers"
-#playlist = "6zJ9XA4stWwQZU0MPU3y79"
-#sp = spotipy.Spotify()
-##sp_playlist = sp.user_playlist_tracks(username, playlist_id=playlist)
-#tracks = sp_playlist['items']
-#print (tracks)
-
-#print(sp.current_user_recently_played(limit=100))
-
-
-#import requests_oauthlib
-#import webbrowser
-#import json
-
-#CLIENT_ID = "1e64d1a09838405e9eaa201d162bddf8"
-#CLIENT_SECRET = "ade3635c31c4463980eeb2d1ec998f1f"
-#AUTHORIZATION_URL = 'https://accounts.spotify.com/authorize'
-
-# NOTE: you need to specify this same REDIRECT_URI in the Spotify API console
-#REDIRECT_URI = 'https://www.programsinformationpeople.org/runestone/oauth'
-
-#oauth = requests_oauthlib.OAuth2Session(CLIENT_ID, redirect_uri=REDIRECT_URI)
-
-#authorization_url, state = oauth.authorization_url(AUTHORIZATION_URL)#, access_type="offline", approval_prompt="force")
-
-#webbrowser.open(authorization_url)
-#authorization_response = raw_input('Enter the full callback URL')
-
-# the OAuth2Session instance has a method that extracts what we need from the url, and does some other back and forth with spotify
-#TOKEN_URL = 'https://accounts.spotify.com/api/token'
-#token = oauth.fetch_token(TOKEN_URL, authorization_response=authorization_response, client_secret=CLIENT_SECRET)
-
-# Now we can just use the get method from here on out to make requests to spotify endpoints
-#r = oauth.get('https://api.spotify.com/v1/me')
-#print (r.url)
-#response_dict = json.loads(r.text)
-#print (json.dumps(response_dict, indent=2))
-
-#base_url = "https://api.spotify.com"
 
 
 
