@@ -1,16 +1,14 @@
 import requests 
 import json
 import plotly
-import spotipy
 import facebook
 import datetime
-import facebook_info
 import sqlite3
 
 ## Facebook API ##
-
-access_token = facebook_info.access_token
-
+access_token = None
+if access_token == None:
+    access_token = input("\nPlease provide access token\n")
 
 CACHE_FNAME = "cached_fbdata.json"
 
@@ -39,6 +37,7 @@ def get_facebook_data(me):
 
 feed = get_facebook_data("Keely Meyers")
 #print(json.dumps(feed, indent=4))
+
 
 def get_weekday(x):
 
@@ -146,27 +145,15 @@ for activity in feed["data"]:
         else:
             sunday_counts[get_time_of_day(activity)] += 1
 
-print(monday_counts, tuesday_counts, wednesday_counts, thursday_counts, friday_counts, saturday_counts, sunday_counts)
 
 # To avoid key errors when using plotly #
 
+weekday_dictionaries = [monday_counts, tuesday_counts, wednesday_counts, thursday_counts, friday_counts, saturday_counts, sunday_counts]
 times = ["12:00am - 5:59am", "6:00am - 11:59am", "12:00pm - 5:59pm", "6:00pm - 11:59pm"]
-for t in times:
-    if t not in monday_counts:
-        monday_counts[t] = 0
-    if t not in tuesday_counts:
-        tuesday_counts[t] = 0
-    if t not in wednesday_counts:
-        wednesday_counts[t] = 0
-    if t not in thursday_counts:
-        thursday_counts[t] = 0
-    if t not in friday_counts:
-        friday_counts[t] = 0
-    if t not in saturday_counts:
-        saturday_counts[t] = 0
-    if t not in sunday_counts:
-        sunday_counts[t] = 0
-
+for w in weekday_dictionaries:
+    for t in times:
+        if t not in w:
+            w[t] = 0
 
 
 ## SQL Database ##
