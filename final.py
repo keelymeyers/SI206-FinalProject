@@ -173,14 +173,10 @@ conn.commit()
 ## Data Visualization ## 
 
 import plotly 
-plotly.tools.set_credentials_file(username='keelym', api_key='pcDVvvfhyFvMo2CRErMZ')
 
 
 import plotly.plotly as py
 import plotly.graph_objs as go
-
-py.sign_in('keelym', 'pcDVvvfhyFvMo2CRErMZ')
-
 
 
 trace1 = go.Bar(x=["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"], y=[monday_counts["12:00am - 5:59am"], tuesday_counts["12:00am - 5:59am"], wednesday_counts["12:00am - 5:59am"], thursday_counts["12:00am - 5:59am"], friday_counts["12:00am - 5:59am"], saturday_counts["12:00am - 5:59am"], sunday_counts["12:00am - 5:59am"]], name="12:00am - 5:59am")
